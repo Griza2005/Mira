@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar' if item and item.id else 'Nuevo' }} ODS{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('ods_list') }}" class="text-decoration-none">Objetivos de Desarrollo Sostenible</a></li>
+        <li class="breadcrumb-item active">{{ 'Editar' if item and item.id else 'Nuevo' }}</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card card-custom">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h4 class="card-title fw-bold mb-0 text-dark">
+                    <i class="bi {{ 'bi-pencil-square text-primary' if item and item.id else 'bi-plus-circle-fill text-success' }} me-2"></i>
+                    {{ 'Editar Objetivo de Desarrollo Sostenible' if item and item.id else 'Nuevo Objetivo de Desarrollo Sostenible' }}
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('ods_update', id=item.id) if item and item.id else url_for('ods_create') }}">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label fw-semibold">Nombre del ODS <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" 
+                               value="{{ item.nombre if item else '' }}" placeholder="Ej. Educación de Calidad" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="categoria" class="form-label fw-semibold">Categoría / Dimensión <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="categoria" name="categoria" 
+                               value="{{ item.categoria if item else '' }}" placeholder="Ej. Social, Económico, Ambiental" required>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{{ url_for('ods_list') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-save me-1"></i> {{ 'Guardar Cambios' if item and item.id else 'Crear Registro' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

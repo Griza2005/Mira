@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Objetivos de Desarrollo Sostenible{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">Inicio</a></li>
+        <li class="breadcrumb-item active">Objetivos de Desarrollo Sostenible</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-globe-americas text-success me-2"></i>Objetivos de Desarrollo Sostenible (ODS)
+        </h2>
+        <p class="text-muted mb-0 small">Metas e iniciativas de desarrollo global asociadas a los proyectos</p>
+    </div>
+    <a href="{{ url_for('ods_new') }}" class="btn btn-success">
+        <i class="bi bi-plus-circle me-1"></i> Nuevo ODS
+    </a>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4" style="width: 80px;">ID</th>
+                        <th>Nombre del ODS</th>
+                        <th>Categoría / Dimensión</th>
+                        <th class="text-center" style="width: 120px;">Estado</th>
+                        <th class="text-end pe-4" style="width: 180px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-secondary">#{{ item.id }}</td>
+                        <td class="fw-semibold">{{ item.nombre }}</td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
+                                {{ item.categoria }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            {% if item.activo %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                    <i class="bi bi-check-circle me-1"></i>Activo
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary px-2 py-1">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{{ url_for('ods_edit', id=item.id) }}" class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ item.id }}" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+
+                            <!-- Modal de Confirmación de Borrado Lógico -->
+                            <div class="modal fade text-start" id="deleteModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-danger text-white">
+                                            <h5 class="modal-title">
+                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Eliminación
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="mb-2">¿Estás seguro de que deseas eliminar el ODS:</p>
+                                            <div class="p-3 bg-light rounded border mb-3">
+                                                <strong>{{ item.nombre }}</strong><br>
+                                                <small class="text-muted">Categoría: {{ item.categoria }}</small>
+                                            </div>
+                                            <div class="alert alert-warning small mb-0">
+                                                <i class="bi bi-info-circle me-1"></i> Se aplicará un <strong>borrado lógico</strong> (activo = 0). El registro dejará de ser visible en el sistema.
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                                            <form method="POST" action="{{ url_for('ods_delete', id=item.id) }}" class="d-inline">
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="bi bi-trash me-1"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                            No hay objetivos de desarrollo sostenible registrados o activos.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

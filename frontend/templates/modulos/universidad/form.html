@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar' if item and item.id else 'Nueva' }} Universidad{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('universidad_list') }}" class="text-decoration-none">Universidades</a></li>
+        <li class="breadcrumb-item active">{{ 'Editar' if item and item.id else 'Nueva' }}</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card card-custom">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h4 class="card-title fw-bold mb-0 text-dark">
+                    <i class="bi {{ 'bi-pencil-square text-primary' if item and item.id else 'bi-plus-circle-fill text-info' }} me-2"></i>
+                    {{ 'Editar Universidad' if item and item.id else 'Nueva Universidad' }}
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('universidad_update', id=item.id) if item and item.id else url_for('universidad_create') }}">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label fw-semibold">Nombre de la Universidad <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" 
+                               value="{{ item.nombre if item else '' }}" placeholder="Ej. Universidad de San Buenaventura" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label fw-semibold">Tipo de Institución <span class="text-danger">*</span></label>
+                        <select class="form-select" id="tipo" name="tipo" required>
+                            <option value="" disabled {{ 'selected' if not item or not item.tipo else '' }}>Selecciona un tipo...</option>
+                            <option value="Privada" {{ 'selected' if item and item.tipo == 'Privada' else '' }}>Privada</option>
+                            <option value="Pública" {{ 'selected' if item and item.tipo == 'Pública' else '' }}>Pública</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="ciudad" class="form-label fw-semibold">Ciudad Sede <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="ciudad" name="ciudad" 
+                               value="{{ item.ciudad if item else '' }}" placeholder="Ej. Medellín" required>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{{ url_for('universidad_list') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-info text-dark px-4">
+                            <i class="bi bi-save me-1"></i> {{ 'Guardar Cambios' if item and item.id else 'Crear Registro' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
