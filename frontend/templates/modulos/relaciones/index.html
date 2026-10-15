@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-diagram-3-fill me-2"></i>Articulación Académica y Relaciones</h2>
+</div>
+
+<!-- Pestañas para las 7 relaciones puente -->
+<ul class="nav nav-pills mb-4" id="relacionesTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="dg-tab" data-bs-toggle="pill" data-bs-target="#dg" type="button" role="tab">1. Docente - Grupo</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="ds-tab" data-bs-toggle="pill" data-bs-target="#ds" type="button" role="tab">2. Docente - Semillero</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="gl-tab" data-bs-toggle="pill" data-bs-target="#gl" type="button" role="tab">3. Grupo - Línea</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="sl-tab" data-bs-toggle="pill" data-bs-target="#sl" type="button" role="tab">4. Semillero - Línea</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="la-tab" data-bs-toggle="pill" data-bs-target="#la" type="button" role="tab">5. Línea - Área</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="lo-tab" data-bs-toggle="pill" data-bs-target="#lo" type="button" role="tab">6. Línea - ODS</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="laa-tab" data-bs-toggle="pill" data-bs-target="#laa" type="button" role="tab">7. Línea - Aplicación</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="relacionesTabContent">
+    <!-- 1. Docente - Grupo -->
+    <div class="tab-pane fade show active" id="dg" role="tabpanel">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 fw-bold">Vincular Docente a Grupo</div>
+            <div class="card-body">
+                <form action="{{ url_for('relaciones_create', tipo='docente_grupo') }}" method="POST" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Docente</label>
+                        <select name="docente_cedula" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for d in docentes %}<option value="{{ d.cedula }}">{{ d.nombres }} {{ d.apellidos }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Grupo</label>
+                        <select name="grupo_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for g in grupos %}<option value="{{ g.id }}">{{ g.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Rol</label>
+                        <input type="text" name="rol" class="form-control" placeholder="Investigador" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Fecha Inicio</label>
+                        <input type="date" name="fecha_inicio" class="form-control" required>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive card shadow-sm border-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light"><tr><th>Docente</th><th>Grupo</th><th>Rol</th><th>Fecha Inicio</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for r in rel_dg %}
+                    <tr>
+                        <td>{{ r.docenteNombre }}</td><td>{{ r.grupoNombre }}</td><td>{{ r.rol }}</td><td>{{ r.fechaInicio.split('T')[0] if r.fechaInicio else '' }}</td>
+                        <td>
+                            <form action="{{ url_for('relaciones_delete', tipo='docente_grupo') }}" method="POST" onsubmit="return confirm('¿Desactivar relación?');">
+                                <input type="hidden" name="docente_cedula" value="{{ r.docenteCedula }}">
+                                <input type="hidden" name="grupo_id" value="{{ r.grupoId }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}<tr><td colspan="5" class="text-center text-muted py-3">Sin vinculaciones.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2. Docente - Semillero -->
+    <div class="tab-pane fade" id="ds" role="tabpanel">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 fw-bold">Asignar Tutoría a Semillero</div>
+            <div class="card-body">
+                <form action="{{ url_for('relaciones_create', tipo='docente_semillero') }}" method="POST" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Docente Tutor</label>
+                        <select name="docente_cedula" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for d in docentes %}<option value="{{ d.cedula }}">{{ d.nombres }} {{ d.apellidos }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Semillero</label>
+                        <select name="semillero_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for s in semilleros %}<option value="{{ s.id }}">{{ s.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Rol</label>
+                        <input type="text" name="rol" class="form-control" value="Tutor" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Periodo</label>
+                        <input type="text" name="periodo_academico" class="form-control" placeholder="2026-1" required>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive card shadow-sm border-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light"><tr><th>Docente</th><th>Semillero</th><th>Rol</th><th>Periodo</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for r in rel_ds %}
+                    <tr>
+                        <td>{{ r.docenteNombre }}</td><td>{{ r.semilleroNombre }}</td><td>{{ r.rol }}</td><td>{{ r.periodoAcademico }}</td>
+                        <td>
+                            <form action="{{ url_for('relaciones_delete', tipo='docente_semillero') }}" method="POST" onsubmit="return confirm('¿Desactivar tutoría?');">
+                                <input type="hidden" name="docente_cedula" value="{{ r.docenteCedula }}">
+                                <input type="hidden" name="semillero_id" value="{{ r.semilleroId }}">
+                                <input type="hidden" name="periodo_academico" value="{{ r.periodoAcademico }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}<tr><td colspan="5" class="text-center text-muted py-3">Sin asignaciones.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 3. Grupo - Línea -->
+    <div class="tab-pane fade" id="gl" role="tabpanel">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 fw-bold">Articular Grupo a Línea</div>
+            <div class="card-body">
+                <form action="{{ url_for('relaciones_create', tipo='grupo_linea') }}" method="POST" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Grupo</label>
+                        <select name="grupo_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for g in grupos %}<option value="{{ g.id }}">{{ g.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Línea de Investigación</label>
+                        <select name="linea_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for l in lineas %}<option value="{{ l.id }}">{{ l.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive card shadow-sm border-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light"><tr><th>Grupo</th><th>Línea</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for r in rel_gl %}
+                    <tr>
+                        <td>{{ r.grupoNombre }}</td><td>{{ r.lineaNombre }}</td>
+                        <td>
+                            <form action="{{ url_for('relaciones_delete', tipo='grupo_linea') }}" method="POST" onsubmit="return confirm('¿Desactivar articulación?');">
+                                <input type="hidden" name="grupo_id" value="{{ r.grupoId }}">
+                                <input type="hidden" name="linea_id" value="{{ r.lineaId }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}<tr><td colspan="3" class="text-center text-muted py-3">Sin articulaciones.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 4. Semillero - Línea -->
+    <div class="tab-pane fade" id="sl" role="tabpanel">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 fw-bold">Articular Semillero a Línea</div>
+            <div class="card-body">
+                <form action="{{ url_for('relaciones_create', tipo='semillero_linea') }}" method="POST" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Semillero</label>
+                        <select name="semillero_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for s in semilleros %}<option value="{{ s.id }}">{{ s.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Línea de Investigación</label>
+                        <select name="linea_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for l in lineas %}<option value="{{ l.id }}">{{ l.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive card shadow-sm border-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light"><tr><th>Semillero</th><th>Línea</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for r in rel_sl %}
+                    <tr>
+                        <td>{{ r.semilleroNombre }}</td><td>{{ r.lineaNombre }}</td>
+                        <td>
+                            <form action="{{ url_for('relaciones_delete', tipo='semillero_linea') }}" method="POST" onsubmit="return confirm('¿Desactivar articulación?');">
+                                <input type="hidden" name="semillero_id" value="{{ r.semilleroId }}">
+                                <input type="hidden" name="linea_id" value="{{ r.lineaId }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}<tr><td colspan="3" class="text-center text-muted py-3">Sin articulaciones.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5. Línea - Área Conocimiento -->
+    <div class="tab-pane fade" id="la" role="tabpanel">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 fw-bold">Articular Línea a Área de Conocimiento</div>
+            <div class="card-body">
+                <form action="{{ url_for('relaciones_create', tipo='linea_area') }}" method="POST" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Línea</label>
+                        <select name="linea_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for l in lineas %}<option value="{{ l.id }}">{{ l.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Área de Conocimiento</label>
+                        <select name="area_conocimiento_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for a in areas %}<option value="{{ a.id }}">{{ a.disciplina }} ({{ a.granArea }})</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive card shadow-sm border-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light"><tr><th>Línea</th><th>Disciplina</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for r in rel_la %}
+                    <tr>
+                        <td>{{ r.lineaNombre }}</td><td>{{ r.areaConocimientoDisciplina }}</td>
+                        <td>
+                            <form action="{{ url_for('relaciones_delete', tipo='linea_area') }}" method="POST" onsubmit="return confirm('¿Desactivar articulación?');">
+                                <input type="hidden" name="linea_id" value="{{ r.lineaId }}">
+                                <input type="hidden" name="area_conocimiento_id" value="{{ r.areaConocimientoId }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}<tr><td colspan="3" class="text-center text-muted py-3">Sin articulaciones.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 6. Línea - ODS -->
+    <div class="tab-pane fade" id="lo" role="tabpanel">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 fw-bold">Articular Línea a ODS</div>
+            <div class="card-body">
+                <form action="{{ url_for('relaciones_create', tipo='linea_ods') }}" method="POST" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Línea</label>
+                        <select name="linea_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for l in lineas %}<option value="{{ l.id }}">{{ l.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">ODS</label>
+                        <select name="ods_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for o in ods %}<option value="{{ o.id }}">{{ o.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive card shadow-sm border-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light"><tr><th>Línea</th><th>ODS</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for r in rel_lo %}
+                    <tr>
+                        <td>{{ r.lineaNombre }}</td><td>{{ r.odsNombre }}</td>
+                        <td>
+                            <form action="{{ url_for('relaciones_delete', tipo='linea_ods') }}" method="POST" onsubmit="return confirm('¿Desactivar articulación?');">
+                                <input type="hidden" name="linea_id" value="{{ r.lineaId }}">
+                                <input type="hidden" name="ods_id" value="{{ r.odsId }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}<tr><td colspan="3" class="text-center text-muted py-3">Sin articulaciones.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 7. Línea - Área Aplicación -->
+    <div class="tab-pane fade" id="laa" role="tabpanel">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 fw-bold">Articular Línea a Área de Aplicación</div>
+            <div class="card-body">
+                <form action="{{ url_for('relaciones_create', tipo='linea_area_aplicacion') }}" method="POST" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Línea</label>
+                        <select name="linea_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for l in lineas %}<option value="{{ l.id }}">{{ l.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Área de Aplicación</label>
+                        <select name="area_aplicacion_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for ap in aplicaciones %}<option value="{{ ap.id }}">{{ ap.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive card shadow-sm border-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light"><tr><th>Línea</th><th>Área de Aplicación</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for r in rel_laa %}
+                    <tr>
+                        <td>{{ r.lineaNombre }}</td><td>{{ r.areaAplicacionNombre }}</td>
+                        <td>
+                            <form action="{{ url_for('relaciones_delete', tipo='linea_area_aplicacion') }}" method="POST" onsubmit="return confirm('¿Desactivar articulación?');">
+                                <input type="hidden" name="linea_id" value="{{ r.lineaId }}">
+                                <input type="hidden" name="area_aplicacion_id" value="{{ r.areaAplicacionId }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}<tr><td colspan="3" class="text-center text-muted py-3">Sin articulaciones.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

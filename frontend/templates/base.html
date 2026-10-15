@@ -30,6 +30,7 @@
         }
         .nav-link {
             font-weight: 500;
+            font-size: 0.92rem;
             transition: all 0.2s ease-in-out;
         }
         .nav-link:hover {
@@ -61,18 +62,18 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-mira sticky-top shadow-sm py-2">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+    <nav class="navbar navbar-expand-xl navbar-dark navbar-mira sticky-top shadow-sm py-2">
+        <div class="container-fluid px-3">
+            <a class="navbar-brand d-flex align-items-center me-3" href="{{ url_for('index') }}">
                 <i class="bi bi-mortarboard-fill me-2 fs-4"></i>
                 <span>MIRA</span>
-                <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">v0.1</span>
+                <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">v0.2</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav me-auto mb-2 mb-xl-0">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">
                             <i class="bi bi-house-door me-1"></i> Inicio
@@ -80,7 +81,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('area_conocimiento_list') }}">
-                            <i class="bi bi-book me-1"></i> Áreas Conocimiento
+                            <i class="bi bi-book me-1"></i> Áreas
                         </a>
                     </li>
                     <li class="nav-item">
@@ -90,12 +91,12 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('area_aplicacion_list') }}">
-                            <i class="bi bi-cpu me-1"></i> Áreas Aplicación
+                            <i class="bi bi-cpu me-1"></i> Aplicaciones
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('termino_clave_list') }}">
-                            <i class="bi bi-tags me-1"></i> Términos Clave
+                            <i class="bi bi-tags me-1"></i> Términos
                         </a>
                     </li>
                     <li class="nav-item">
@@ -105,7 +106,28 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('linea_investigacion_list') }}">
-                            <i class="bi bi-diagram-3 me-1"></i> Líneas Investigación
+                            <i class="bi bi-diagram-3 me-1"></i> Líneas
+                        </a>
+                    </li>
+                    <!-- Nuevos módulos de la Entrega 2 -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('docente_list') }}">
+                            <i class="bi bi-people-fill me-1"></i> Docentes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('grupo_investigacion_list') }}">
+                            <i class="bi bi-collection-fill me-1"></i> Grupos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('semillero_list') }}">
+                            <i class="bi bi-sprout me-1"></i> Semilleros
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-warning fw-bold" href="{{ url_for('relaciones_dashboard') }}">
+                            <i class="bi bi-bezier2 me-1"></i> Articulación
                         </a>
                     </li>
                 </ul>
@@ -159,4 +181,3 @@
     {% block scripts %}{% endblock %}
 </body>
 </html>
-

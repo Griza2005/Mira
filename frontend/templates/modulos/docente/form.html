@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm border-0 col-lg-8 mx-auto">
+    <div class="card-header bg-white py-3">
+        <h4 class="mb-0">{{ 'Registrar Nuevo Docente' if is_new else 'Editar Docente' }}</h4>
+    </div>
+    <div class="card-body p-4">
+        <form action="{{ url_for('docente_create') if is_new else url_for('docente_update', cedula=item.cedula) }}" method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Cédula *</label>
+                    <input type="number" name="cedula" class="form-control" value="{{ item.cedula if item else '' }}" {{ '' if is_new else 'readonly disabled' }} required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Correo Institucional *</label>
+                    <input type="email" name="correo" class="form-control" value="{{ item.correo if item else '' }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Nombres *</label>
+                    <input type="text" name="nombres" class="form-control" value="{{ item.nombres if item else '' }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Apellidos *</label>
+                    <input type="text" name="apellidos" class="form-control" value="{{ item.apellidos if item else '' }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Escalafón</label>
+                    <input type="text" name="escalafon" class="form-control" value="{{ item.escalafon if item and item.escalafon else '' }}" placeholder="Titular, Asociado...">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Categoría MinCiencias</label>
+                    <input type="text" name="categoria_minciencias" class="form-control" value="{{ item.categoriaMinciencias if item and item.categoriaMinciencias else '' }}" placeholder="Senior, Asociado, Junior...">
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Enlace CvLAC</label>
+                    <input type="url" name="enlace_cvlac" class="form-control" value="{{ item.enlaceCvlac if item and item.enlaceCvlac else '' }}" placeholder="https://scienti.minciencias.gov.co/cvlac/...">
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Línea de Investigación Principal (Selector Dinámico)</label>
+                    <select name="linea_investigacion_principal" class="form-select">
+                        <option value="">-- Sin asignar --</option>
+                        {% for linea in lineas %}
+                        <option value="{{ linea.id }}" {% if item and item.lineaInvestigacionPrincipal == linea.id %}selected{% endif %}>
+                            {{ linea.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ url_for('docente_list') }}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
