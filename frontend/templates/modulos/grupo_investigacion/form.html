@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm border-0 col-lg-8 mx-auto">
+    <div class="card-header bg-white py-3">
+        <h4 class="mb-0">{{ 'Registrar Grupo de Investigación' if not item or not item.id else 'Editar Grupo de Investigación' }}</h4>
+    </div>
+    <div class="card-body p-4">
+        <form action="{{ url_for('grupo_investigacion_create') if not item or not item.id else url_for('grupo_investigacion_update', id=item.id) }}" method="POST">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Código *</label>
+                    <input type="text" name="codigo" class="form-control" value="{{ item.codigo if item else '' }}" placeholder="COL0000000" required>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label fw-semibold">Nombre del Grupo *</label>
+                    <input type="text" name="nombre" class="form-control" value="{{ item.nombre if item else '' }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Sede Universitaria (Selector Dinámico) *</label>
+                    <select name="universidad_id" class="form-select" required>
+                        <option value="">-- Seleccione Universidad --</option>
+                        {% for u in universidades %}
+                        <option value="{{ u.id }}" {% if item and item.universidadId == u.id %}selected{% endif %}>
+                            {{ u.nombre }} ({{ u.ciudad }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Docente Líder (Selector Dinámico) *</label>
+                    <select name="docente_lider_cedula" class="form-select" required>
+                        <option value="">-- Seleccione Docente Líder --</option>
+                        {% for d in docentes %}
+                        <option value="{{ d.cedula }}" {% if item and item.docenteLiderCedula == d.cedula %}selected{% endif %}>
+                            {{ d.nombres }} {{ d.apellidos }} (CC: {{ d.cedula }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Categoría MinCiencias</label>
+                    <input type="text" name="categoria_minciencias" class="form-control" value="{{ item.categoriaMinciencias if item and item.categoriaMinciencias else '' }}" placeholder="A1, A, B, C...">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Enlace GrupLAC</label>
+                    <input type="url" name="enlace_gruplac" class="form-control" value="{{ item.enlaceGruplac if item and item.enlaceGruplac else '' }}" placeholder="https://scienti.minciencias.gov.co/gruplac/...">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ url_for('grupo_investigacion_list') }}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

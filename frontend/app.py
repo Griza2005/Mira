@@ -9,7 +9,7 @@ app.secret_key = os.getenv("SECRET_KEY", "mira-secret-key-prod-local")
 # URL base de la API REST de MIRA
 API_URL = os.getenv("API_URL", "http://localhost:8081/api").rstrip("/")
 
-def api_call(method, path, json_data=None):
+def api_call(method, path, json_data=None, params=None):
     """Función auxiliar para realizar llamadas seguras a la API REST."""
     url = f"{API_URL}/{path.lstrip('/')}"
     try:
@@ -17,11 +17,12 @@ def api_call(method, path, json_data=None):
             method=method,
             url=url,
             json=json_data,
+            params=params,
             headers={"Content-Type": "application/json"},
             timeout=8
         )
         return response
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         return None
 
 # =============================================================================
@@ -401,7 +402,421 @@ def linea_investigacion_delete(id):
         flash("No se pudo eliminar el registro.", "danger")
     return redirect(url_for("linea_investigacion_list"))
 
+# =============================================================================
+# Módulo 7: Docente (HU 3)
+# =============================================================================
+def _get_lineas_activas():
+    resp = api_call("GET", "linea_investigacion")
+    return resp.json() if resp and resp.status_code == 200 else []
+
+@app.route("/docente")
+def docente_list():
+    resp = api_call("GET", "docente")
+    items = resp.json() if resp and resp.status_code == 200 else []
+    if resp is None:
+        flash("No fue posible conectar con la API REST.", "danger")
+    return render_template("modulos/docente/list.html", items=items)
+
+@app.route("/docente/nuevo")
+def docente_new():
+    return render_template("modulos/docente/form.html", item=None, lineas=_get_lineas_activas(), is_new=True)
+
+@app.route("/docente/crear", methods=["POST"])
+def docente_create():
+    cedula_val = request.form.get("cedula", "").strip()
+    linea_val = request.form.get("linea_investigacion_principal", "").strip()
+    payload = {
+        "cedula": int(cedula_val) if cedula_val.isdigit() else 0,
+        "nombres": request.form.get("nombres", "").strip(),
+        "apellidos": request.form.get("apellidos", "").strip(),
+        "correo": request.form.get("correo", "").strip(),
+        "enlaceCvlac": request.form.get("enlace_cvlac", "").strip() or None,
+        "escalafon": request.form.get("escalafon", "").strip() or None,
+        "categoriaMinciencias": request.form.get("categoria_minciencias", "").strip() or None,
+        "lineaInvestigacionPrincipal": int(linea_val) if linea_val.isdigit() else None
+    }
+    resp = api_call("POST", "docente", payload)
+    if resp and resp.status_code == 201:
+        flash("Docente registrado exitosamente.", "success")
+        return redirect(url_for("docente_list"))
+    error_msg = resp.json().get("mensaje", "Error al crear docente.") if resp else "Error de conexión."
+    flash(f"Error: {error_msg}", "danger")
+    return render_template("modulos/docente/form.html", item=payload, lineas=_get_lineas_activas(), is_new=True)
+
+@app.route("/docente/editar/<int:cedula>")
+def docente_edit(cedula):
+    resp = api_call("GET", f"docente/{cedula}")
+    if resp and resp.status_code == 200:
+        return render_template("modulos/docente/form.html", item=resp.json(), lineas=_get_lineas_activas(), is_new=False)
+    flash("Docente no encontrado o inactivo.", "warning")
+    return redirect(url_for("docente_list"))
+
+@app.route("/docente/editar/<int:cedula>", methods=["POST"])
+def docente_update(cedula):
+    linea_val = request.form.get("linea_investigacion_principal", "").strip()
+    payload = {
+        "cedula": cedula,
+        "nombres": request.form.get("nombres", "").strip(),
+        "apellidos": request.form.get("apellidos", "").strip(),
+        "correo": request.form.get("correo", "").strip(),
+        "enlaceCvlac": request.form.get("enlace_cvlac", "").strip() or None,
+        "escalafon": request.form.get("escalafon", "").strip() or None,
+        "categoriaMinciencias": request.form.get("categoria_minciencias", "").strip() or None,
+        "lineaInvestigacionPrincipal": int(linea_val) if linea_val.isdigit() else None
+    }
+    resp = api_call("PUT", f"docente/{cedula}", payload)
+    if resp and resp.status_code == 200:
+        flash("Docente actualizado exitosamente.", "success")
+        return redirect(url_for("docente_list"))
+    error_msg = resp.json().get("mensaje", "Error al actualizar.") if resp else "Error de conexión."
+    flash(f"Error: {error_msg}", "danger")
+    return render_template("modulos/docente/form.html", item=payload, lineas=_get_lineas_activas(), is_new=False)
+
+@app.route("/docente/eliminar/<int:cedula>", methods=["POST"])
+def docente_delete(cedula):
+    resp = api_call("DELETE", f"docente/{cedula}")
+    if resp and resp.status_code == 200:
+        flash("Docente desactivado exitosamente (borrado lógico).", "success")
+    else:
+        flash("No se pudo desactivar el docente.", "danger")
+    return redirect(url_for("docente_list"))
+
+# =============================================================================
+# Módulo 8: Grupo de Investigación (HU 5)
+# =============================================================================
+def _get_universidades_activas():
+    resp = api_call("GET", "universidad")
+    return resp.json() if resp and resp.status_code == 200 else []
+
+def _get_docentes_activos():
+    resp = api_call("GET", "docente")
+    return resp.json() if resp and resp.status_code == 200 else []
+
+@app.route("/grupo_investigacion")
+def grupo_investigacion_list():
+    resp = api_call("GET", "grupo_investigacion")
+    items = resp.json() if resp and resp.status_code == 200 else []
+    if resp is None:
+        flash("No fue posible conectar con la API REST.", "danger")
+    return render_template("modulos/grupo_investigacion/list.html", items=items)
+
+@app.route("/grupo_investigacion/nuevo")
+def grupo_investigacion_new():
+    return render_template(
+        "modulos/grupo_investigacion/form.html",
+        item=None,
+        universidades=_get_universidades_activas(),
+        docentes=_get_docentes_activos()
+    )
+
+@app.route("/grupo_investigacion/crear", methods=["POST"])
+def grupo_investigacion_create():
+    u_id = request.form.get("universidad_id", "").strip()
+    d_cedula = request.form.get("docente_lider_cedula", "").strip()
+    payload = {
+        "codigo": request.form.get("codigo", "").strip(),
+        "nombre": request.form.get("nombre", "").strip(),
+        "enlaceGruplac": request.form.get("enlace_gruplac", "").strip() or None,
+        "categoriaMinciencias": request.form.get("categoria_minciencias", "").strip() or None,
+        "universidadId": int(u_id) if u_id.isdigit() else 0,
+        "docenteLiderCedula": int(d_cedula) if d_cedula.isdigit() else 0
+    }
+    resp = api_call("POST", "grupo_investigacion", payload)
+    if resp and resp.status_code == 201:
+        flash("Grupo de investigación registrado exitosamente.", "success")
+        return redirect(url_for("grupo_investigacion_list"))
+    error_msg = resp.json().get("mensaje", "Error al registrar grupo.") if resp else "Error de conexión."
+    flash(f"Error: {error_msg}", "danger")
+    return render_template(
+        "modulos/grupo_investigacion/form.html",
+        item=payload,
+        universidades=_get_universidades_activas(),
+        docentes=_get_docentes_activos()
+    )
+
+@app.route("/grupo_investigacion/editar/<int:id>")
+def grupo_investigacion_edit(id):
+    resp = api_call("GET", f"grupo_investigacion/{id}")
+    if resp and resp.status_code == 200:
+        return render_template(
+            "modulos/grupo_investigacion/form.html",
+            item=resp.json(),
+            universidades=_get_universidades_activas(),
+            docentes=_get_docentes_activos()
+        )
+    flash("Grupo de investigación no encontrado o inactivo.", "warning")
+    return redirect(url_for("grupo_investigacion_list"))
+
+@app.route("/grupo_investigacion/editar/<int:id>", methods=["POST"])
+def grupo_investigacion_update(id):
+    u_id = request.form.get("universidad_id", "").strip()
+    d_cedula = request.form.get("docente_lider_cedula", "").strip()
+    payload = {
+        "id": id,
+        "codigo": request.form.get("codigo", "").strip(),
+        "nombre": request.form.get("nombre", "").strip(),
+        "enlaceGruplac": request.form.get("enlace_gruplac", "").strip() or None,
+        "categoriaMinciencias": request.form.get("categoria_minciencias", "").strip() or None,
+        "universidadId": int(u_id) if u_id.isdigit() else 0,
+        "docenteLiderCedula": int(d_cedula) if d_cedula.isdigit() else 0
+    }
+    resp = api_call("PUT", f"grupo_investigacion/{id}", payload)
+    if resp and resp.status_code == 200:
+        flash("Grupo de investigación actualizado exitosamente.", "success")
+        return redirect(url_for("grupo_investigacion_list"))
+    error_msg = resp.json().get("mensaje", "Error al actualizar grupo.") if resp else "Error de conexión."
+    flash(f"Error: {error_msg}", "danger")
+    return render_template(
+        "modulos/grupo_investigacion/form.html",
+        item=payload,
+        universidades=_get_universidades_activas(),
+        docentes=_get_docentes_activos()
+    )
+
+@app.route("/grupo_investigacion/eliminar/<int:id>", methods=["POST"])
+def grupo_investigacion_delete(id):
+    resp = api_call("DELETE", f"grupo_investigacion/{id}")
+    if resp and resp.status_code == 200:
+        flash("Grupo de investigación desactivado exitosamente (borrado lógico).", "success")
+    else:
+        flash("No se pudo desactivar el grupo de investigación.", "danger")
+    return redirect(url_for("grupo_investigacion_list"))
+
+# =============================================================================
+# Módulo 9: Semillero de Investigación (HU 6)
+# =============================================================================
+def _get_grupos_activos():
+    resp = api_call("GET", "grupo_investigacion")
+    return resp.json() if resp and resp.status_code == 200 else []
+
+@app.route("/semillero")
+def semillero_list():
+    resp = api_call("GET", "semillero")
+    items = resp.json() if resp and resp.status_code == 200 else []
+    if resp is None:
+        flash("No fue posible conectar con la API REST.", "danger")
+    return render_template("modulos/semillero/list.html", items=items)
+
+@app.route("/semillero/nuevo")
+def semillero_new():
+    return render_template("modulos/semillero/form.html", item=None, grupos=_get_grupos_activos())
+
+@app.route("/semillero/crear", methods=["POST"])
+def semillero_create():
+    g_id = request.form.get("grupo_investigacion_id", "").strip()
+    payload = {
+        "nombre": request.form.get("nombre", "").strip(),
+        "descripcion": request.form.get("descripcion", "").strip() or None,
+        "grupoInvestigacionId": int(g_id) if g_id.isdigit() else 0
+    }
+    resp = api_call("POST", "semillero", payload)
+    if resp and resp.status_code == 201:
+        flash("Semillero creado exitosamente.", "success")
+        return redirect(url_for("semillero_list"))
+    error_msg = resp.json().get("mensaje", "Error al crear semillero.") if resp else "Error de conexión."
+    flash(f"Error: {error_msg}", "danger")
+    return render_template("modulos/semillero/form.html", item=payload, grupos=_get_grupos_activos())
+
+@app.route("/semillero/editar/<int:id>")
+def semillero_edit(id):
+    resp = api_call("GET", f"semillero/{id}")
+    if resp and resp.status_code == 200:
+        return render_template("modulos/semillero/form.html", item=resp.json(), grupos=_get_grupos_activos())
+    flash("Semillero no encontrado o inactivo.", "warning")
+    return redirect(url_for("semillero_list"))
+
+@app.route("/semillero/editar/<int:id>", methods=["POST"])
+def semillero_update(id):
+    g_id = request.form.get("grupo_investigacion_id", "").strip()
+    payload = {
+        "id": id,
+        "nombre": request.form.get("nombre", "").strip(),
+        "descripcion": request.form.get("descripcion", "").strip() or None,
+        "grupoInvestigacionId": int(g_id) if g_id.isdigit() else 0
+    }
+    resp = api_call("PUT", f"semillero/{id}", payload)
+    if resp and resp.status_code == 200:
+        flash("Semillero actualizado exitosamente.", "success")
+        return redirect(url_for("semillero_list"))
+    error_msg = resp.json().get("mensaje", "Error al actualizar semillero.") if resp else "Error de conexión."
+    flash(f"Error: {error_msg}", "danger")
+    return render_template("modulos/semillero/form.html", item=payload, grupos=_get_grupos_activos())
+
+@app.route("/semillero/eliminar/<int:id>", methods=["POST"])
+def semillero_delete(id):
+    resp = api_call("DELETE", f"semillero/{id}")
+    if resp and resp.status_code == 200:
+        flash("Semillero desactivado exitosamente (borrado lógico).", "success")
+    else:
+        flash("No se pudo desactivar el semillero.", "danger")
+    return redirect(url_for("semillero_list"))
+
+# =============================================================================
+# Módulo 10: Relaciones y Articulaciones (Tablas Puente HU 5, 6, 8, 9)
+# =============================================================================
+@app.route("/relaciones")
+def relaciones_dashboard():
+    # Carga de catálogos para selectores dinámicos
+    docentes = _get_docentes_activos()
+    grupos = _get_grupos_activos()
+    semilleros = api_call("GET", "semillero").json() if api_call("GET", "semillero") else []
+    lineas = _get_lineas_activas()
+    areas = api_call("GET", "area_conocimiento").json() if api_call("GET", "area_conocimiento") else []
+    ods = api_call("GET", "objetivo_desarrollo_sostenible").json() if api_call("GET", "objetivo_desarrollo_sostenible") else []
+    aplicaciones = api_call("GET", "area_aplicacion").json() if api_call("GET", "area_aplicacion") else []
+
+    # Carga de relaciones activas actuales
+    dg = api_call("GET", "docente_grupo").json() if api_call("GET", "docente_grupo") else []
+    ds = api_call("GET", "docente_semillero").json() if api_call("GET", "docente_semillero") else []
+    gl = api_call("GET", "grupo_linea").json() if api_call("GET", "grupo_linea") else []
+    sl = api_call("GET", "semillero_linea").json() if api_call("GET", "semillero_linea") else []
+    la = api_call("GET", "linea_area").json() if api_call("GET", "linea_area") else []
+    lo = api_call("GET", "linea_ods").json() if api_call("GET", "linea_ods") else []
+    laa = api_call("GET", "linea_area_aplicacion").json() if api_call("GET", "linea_area_aplicacion") else []
+
+    return render_template(
+        "modulos/relaciones/index.html",
+        docentes=docentes,
+        grupos=grupos,
+        semilleros=semilleros,
+        lineas=lineas,
+        areas=areas,
+        ods=ods,
+        aplicaciones=aplicaciones,
+        rel_dg=dg,
+        rel_ds=ds,
+        rel_gl=gl,
+        rel_sl=sl,
+        rel_la=la,
+        rel_lo=lo,
+        rel_laa=laa
+    )
+
+@app.route("/relaciones/crear/<tipo>", methods=["POST"])
+def relaciones_create(tipo):
+    path_map = {
+        "docente_grupo": "docente_grupo",
+        "docente_semillero": "docente_semillero",
+        "grupo_linea": "grupo_linea",
+        "semillero_linea": "semillero_linea",
+        "linea_area": "linea_area",
+        "linea_ods": "linea_ods",
+        "linea_area_aplicacion": "linea_area_aplicacion"
+    }
+    if tipo not in path_map:
+        flash("Tipo de relación no válido.", "danger")
+        return redirect(url_for("relaciones_dashboard"))
+
+    payload = {}
+    if tipo == "docente_grupo":
+        payload = {
+            "docenteCedula": int(request.form.get("docente_cedula", 0)),
+            "grupoId": int(request.form.get("grupo_id", 0)),
+            "rol": request.form.get("rol", "").strip(),
+            "fechaInicio": request.form.get("fecha_inicio", "") + "T00:00:00Z",
+            "fechaFin": (request.form.get("fecha_fin", "") + "T00:00:00Z") if request.form.get("fecha_fin") else None
+        }
+    elif tipo == "docente_semillero":
+        payload = {
+            "docenteCedula": int(request.form.get("docente_cedula", 0)),
+            "semilleroId": int(request.form.get("semillero_id", 0)),
+            "rol": request.form.get("rol", "").strip(),
+            "periodoAcademico": request.form.get("periodo_academico", "").strip()
+        }
+    elif tipo == "grupo_linea":
+        payload = {
+            "grupoId": int(request.form.get("grupo_id", 0)),
+            "lineaId": int(request.form.get("linea_id", 0))
+        }
+    elif tipo == "semillero_linea":
+        payload = {
+            "semilleroId": int(request.form.get("semillero_id", 0)),
+            "lineaId": int(request.form.get("linea_id", 0))
+        }
+    elif tipo == "linea_area":
+        payload = {
+            "lineaId": int(request.form.get("linea_id", 0)),
+            "areaConocimientoId": int(request.form.get("area_conocimiento_id", 0))
+        }
+    elif tipo == "linea_ods":
+        payload = {
+            "lineaId": int(request.form.get("linea_id", 0)),
+            "odsId": int(request.form.get("ods_id", 0))
+        }
+    elif tipo == "linea_area_aplicacion":
+        payload = {
+            "lineaId": int(request.form.get("linea_id", 0)),
+            "areaAplicacionId": int(request.form.get("area_aplicacion_id", 0))
+        }
+
+    resp = api_call("POST", path_map[tipo], payload)
+    if resp and (resp.status_code == 200 or resp.status_code == 201):
+        flash("Relación vinculada exitosamente.", "success")
+    else:
+        error_msg = resp.json().get("mensaje", "Error al vincular relación.") if resp else "Error de conexión."
+        flash(f"Error: {error_msg}", "danger")
+    return redirect(url_for("relaciones_dashboard"))
+
+@app.route("/relaciones/eliminar/<tipo>", methods=["POST"])
+def relaciones_delete(tipo):
+    path_map = {
+        "docente_grupo": "docente_grupo",
+        "docente_semillero": "docente_semillero",
+        "grupo_linea": "grupo_linea",
+        "semillero_linea": "semillero_linea",
+        "linea_area": "linea_area",
+        "linea_ods": "linea_ods",
+        "linea_area_aplicacion": "linea_area_aplicacion"
+    }
+    if tipo not in path_map:
+        flash("Tipo de relación no válido.", "danger")
+        return redirect(url_for("relaciones_dashboard"))
+
+    params = {}
+    if tipo == "docente_grupo":
+        params = {
+            "docenteCedula": request.form.get("docente_cedula"),
+            "grupoId": request.form.get("grupo_id")
+        }
+    elif tipo == "docente_semillero":
+        params = {
+            "docenteCedula": request.form.get("docente_cedula"),
+            "semilleroId": request.form.get("semillero_id"),
+            "periodoAcademico": request.form.get("periodo_academico")
+        }
+    elif tipo == "grupo_linea":
+        params = {
+            "grupoId": request.form.get("grupo_id"),
+            "lineaId": request.form.get("linea_id")
+        }
+    elif tipo == "semillero_linea":
+        params = {
+            "semilleroId": request.form.get("semillero_id"),
+            "lineaId": request.form.get("linea_id")
+        }
+    elif tipo == "linea_area":
+        params = {
+            "lineaId": request.form.get("linea_id"),
+            "areaConocimientoId": request.form.get("area_conocimiento_id")
+        }
+    elif tipo == "linea_ods":
+        params = {
+            "lineaId": request.form.get("linea_id"),
+            "odsId": request.form.get("ods_id")
+        }
+    elif tipo == "linea_area_aplicacion":
+        params = {
+            "lineaId": request.form.get("linea_id"),
+            "areaAplicacionId": request.form.get("area_aplicacion_id")
+        }
+
+    resp = api_call("DELETE", path_map[tipo], params=params)
+    if resp and resp.status_code == 200:
+        flash("Relación desactivada exitosamente (borrado lógico).", "success")
+    else:
+        flash("No se pudo desactivar la relación.", "danger")
+    return redirect(url_for("relaciones_dashboard"))
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
-

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow-sm border-0 col-lg-8 mx-auto">
+    <div class="card-header bg-white py-3">
+        <h4 class="mb-0">{{ 'Registrar Semillero' if not item or not item.id else 'Editar Semillero' }}</h4>
+    </div>
+    <div class="card-body p-4">
+        <form action="{{ url_for('semillero_create') if not item or not item.id else url_for('semillero_update', id=item.id) }}" method="POST">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Nombre del Semillero *</label>
+                    <input type="text" name="nombre" class="form-control" value="{{ item.nombre if item else '' }}" required>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Grupo de Investigación Adscrito (Selector Dinámico) *</label>
+                    <select name="grupo_investigacion_id" class="form-select" required>
+                        <option value="">-- Seleccione Grupo Base --</option>
+                        {% for g in grupos %}
+                        <option value="{{ g.id }}" {% if item and item.grupoInvestigacionId == g.id %}selected{% endif %}>
+                            {{ g.nombre }} ({{ g.codigo }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Descripción o Enfoque</label>
+                    <textarea name="descripcion" class="form-control" rows="3">{{ item.descripcion if item and item.descripcion else '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ url_for('semillero_list') }}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
