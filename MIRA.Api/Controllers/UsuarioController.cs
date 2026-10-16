@@ -10,7 +10,7 @@ namespace MIRA.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Administrador")]
+     [Authorize(Roles = "Administrador")] // Desactivado temporalmente para registrar el superadmin
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;
