@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 namespace MIRA.Api.Peticiones;
 
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using MIRA.Api.Servicios;
 
 [ApiController]
 [Route("api/grupo_investigacion")]
+[Authorize]
 public class GrupoInvestigacionController : ControllerBase
 {
     private readonly IGrupoInvestigacionService _service;

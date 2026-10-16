@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization; // 1. <- Agregar esta directiva
 using Microsoft.AspNetCore.Mvc;
 using MIRA.Api.Modelos;
 using MIRA.Api.Servicios;
@@ -6,6 +7,7 @@ namespace MIRA.Api.Peticiones;
 
 [ApiController]
 [Route("api/area_aplicacion")]
+[Authorize] // 2. <- Agregar este candado aquí
 public class AreaAplicacionController : ControllerBase
 {
     private readonly IAreaAplicacionService _service;
@@ -83,4 +85,3 @@ public class AreaAplicacionController : ControllerBase
         return Ok(new { mensaje = "Área de aplicación eliminada lógicamente." });
     }
 }
-

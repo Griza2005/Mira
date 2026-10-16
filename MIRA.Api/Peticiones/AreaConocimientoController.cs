@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MIRA.Api.Modelos;
 using MIRA.Api.Servicios;
@@ -6,6 +7,7 @@ namespace MIRA.Api.Peticiones;
 
 [ApiController]
 [Route("api/area_conocimiento")]
+[Authorize]
 public class AreaConocimientoController : ControllerBase
 {
     private readonly IAreaConocimientoService _service;
