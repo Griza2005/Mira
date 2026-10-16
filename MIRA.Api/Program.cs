@@ -1,9 +1,14 @@
 using System.Text;
+using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MIRA.Api.Configuracion;
 using MIRA.Api.Repositorios;
 using MIRA.Api.Servicios;
+
+// Habilitar mapeo automático de columnas snake_case de PostgreSQL a propiedades PascalCase en Dapper
+DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,8 +88,11 @@ builder.Services.AddCors(options =>
 });
 
 // =============================================================================
-// INYECCIÓN DE DEPENDENCIAS (Repositorios y Servicios con Dapper)
+// INYECCIÓN DE DEPENDENCIAS (Conexión, Repositorios y Servicios con Dapper)
 // =============================================================================
+
+// Fábrica de conexión a PostgreSQL
+builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
 
 // --- FASE 1: Catálogos Base ---
 builder.Services.AddScoped<IAreaConocimientoRepository, AreaConocimientoRepository>();
