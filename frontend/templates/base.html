@@ -67,74 +67,105 @@
             <a class="navbar-brand d-flex align-items-center me-3" href="{{ url_for('index') }}">
                 <i class="bi bi-mortarboard-fill me-2 fs-4"></i>
                 <span>MIRA</span>
-                <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">v0.2</span>
+                <!-- Versión actualizada a v0.3 -->
+                <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">v0.3</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-xl-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="bi bi-house-door me-1"></i> Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('area_conocimiento_list') }}">
-                            <i class="bi bi-book me-1"></i> Áreas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('ods_list') }}">
-                            <i class="bi bi-globe-americas me-1"></i> ODS
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('area_aplicacion_list') }}">
-                            <i class="bi bi-cpu me-1"></i> Aplicaciones
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('termino_clave_list') }}">
-                            <i class="bi bi-tags me-1"></i> Términos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('universidad_list') }}">
-                            <i class="bi bi-buildings me-1"></i> Universidades
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('linea_investigacion_list') }}">
-                            <i class="bi bi-diagram-3 me-1"></i> Líneas
-                        </a>
-                    </li>
-                    <!-- Nuevos módulos de la Entrega 2 -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('docente_list') }}">
-                            <i class="bi bi-people-fill me-1"></i> Docentes
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('grupo_investigacion_list') }}">
-                            <i class="bi bi-collection-fill me-1"></i> Grupos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('semillero_list') }}">
-                            <i class="bi bi-sprout me-1"></i> Semilleros
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-warning fw-bold" href="{{ url_for('relaciones_dashboard') }}">
-                            <i class="bi bi-bezier2 me-1"></i> Articulación
-                        </a>
-                    </li>
+                    {% if is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('index') }}">
+                                <i class="bi bi-house-door me-1"></i> Inicio
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('area_conocimiento_list') }}">
+                                <i class="bi bi-book me-1"></i> Áreas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('ods_list') }}">
+                                <i class="bi bi-globe-americas me-1"></i> ODS
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('area_aplicacion_list') }}">
+                                <i class="bi bi-cpu me-1"></i> Aplicaciones
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('termino_clave_list') }}">
+                                <i class="bi bi-tags me-1"></i> Términos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('universidad_list') }}">
+                                <i class="bi bi-buildings me-1"></i> Universidades
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('linea_investigacion_list') }}">
+                                <i class="bi bi-diagram-3 me-1"></i> Líneas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('docente_list') }}">
+                                <i class="bi bi-people-fill me-1"></i> Docentes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('grupo_investigacion_list') }}">
+                                <i class="bi bi-collection-fill me-1"></i> Grupos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('semillero_list') }}">
+                                <i class="bi bi-sprout me-1"></i> Semilleros
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-bold" href="{{ url_for('relaciones_dashboard') }}">
+                                <i class="bi bi-bezier2 me-1"></i> Articulación
+                            </a>
+                        </li>
+                        <!-- Módulo Exclusivo para Administradores -->
+                        {% if current_user and 'Administrador' in current_user.roles %}
+                        <li class="nav-item">
+                            <a class="nav-link text-info fw-bold" href="{{ url_for('usuarios_list') }}">
+                                <i class="bi bi-shield-lock-fill me-1"></i> Usuarios
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
                 </ul>
-                <div class="d-flex align-items-center">
+
+                <!-- Acciones del Usuario en Navbar -->
+                <div class="d-flex align-items-center gap-2">
                     <a href="http://localhost:8081/swagger" target="_blank" class="btn btn-sm btn-outline-light d-flex align-items-center">
                         <i class="bi bi-code-slash me-1"></i> Swagger API
                     </a>
+
+                    {% if is_authenticated %}
+                        <div class="d-flex align-items-center ms-2 text-white">
+                            <span class="small me-2">
+                                <i class="bi bi-person-circle me-1"></i>
+                                <strong>{{ current_user.username }}</strong>
+                                {% if current_user.roles %}
+                                    <span class="badge bg-warning text-dark ms-1">{{ current_user.roles[0] }}</span>
+                                {% endif %}
+                            </span>
+                            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-warning text-white" title="Cerrar Sesión">
+                                <i class="bi bi-box-arrow-right me-1"></i> Salir
+                            </a>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-sm btn-light fw-semibold ms-2">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -149,7 +180,7 @@
                     <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
                         {% if category == 'success' %}
                             <i class="bi bi-check-circle-fill me-2"></i>
-                        {% elif category == 'danger' %}
+                        {% elif category == 'danger' or category == 'error' %}
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>
                         {% else %}
                             <i class="bi bi-info-circle-fill me-2"></i>

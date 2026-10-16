@@ -1,27 +1,16 @@
 {% extends "base.html" %}
 
-{% block titulo %}Iniciar Sesión - MIRA{% endblock %}
+{% block title %}Iniciar Sesión - MIRA{% endblock %}
 
-{% block contenido %}
+{% block content %}
 <div class="row justify-content-center mt-5">
     <div class="col-md-5">
         <div class="card shadow border-0">
             <div class="card-header bg-primary text-white text-center py-3">
-                <h4 class="mb-0 fw-bold">MIRA - Iniciar Sesión</h4>
+                <h4 class="mb-0 fw-bold">MIRA - Acceso al Sistema</h4>
                 <small>Módulo de Investigación y Gestión Académica</small>
             </div>
             <div class="card-body p-4">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ 'danger' if category in ['danger', 'error'] else category }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-
                 <form method="POST" action="{{ url_for('login') }}">
                     <div class="mb-3">
                         <label for="username" class="form-label fw-semibold">Usuario</label>
