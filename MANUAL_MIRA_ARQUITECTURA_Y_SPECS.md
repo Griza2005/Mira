@@ -41,7 +41,7 @@ El archivo de proyecto define explícitamente el framework `.NET 7.0` y las 6 de
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup>   
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <!-- Driver oficial de PostgreSQL para .NET -->
